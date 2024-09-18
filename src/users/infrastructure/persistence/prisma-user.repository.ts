@@ -7,10 +7,10 @@ import { User } from '../../domain/entities/user.entity';
 export class PrismaUserRepository implements UserRepository {
     constructor(private readonly prisma: PrismaService) { }
 
-    async create(user: { fullName: string; email: string; password: string }): Promise<User> {
+    async create(user: { full_name: string; email: string; password: string }): Promise<User> {
         const createdUser = await this.prisma.users.create({
             data: {
-                full_name: user.fullName,
+                full_name: user.full_name,
                 email: user.email,
                 password: user.password,
             },
