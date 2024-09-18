@@ -8,9 +8,9 @@ export class UserController {
   ) { }
 
   @Post('add')
-  async addUser(@Body() body: { fullName: string; email: string; password: string }) {
+  async addUser(@Body() body: { full_name: string; email: string; password: string }) {
     try {
-      const user = await this.createUserUseCase.execute(body.fullName, body.email, body.password);
+      const user = await this.createUserUseCase.execute(body.full_name, body.email, body.password);
       return user;
     } catch (error) {
       throw new HttpException(error.message, HttpStatus.BAD_REQUEST);

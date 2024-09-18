@@ -11,7 +11,7 @@ import { PrismaService } from '../prisma/prisma.services';
     CreateUserUseCase,
     PrismaService,
     {
-      provide: 'UserRepository',   // Cuando se vea "UserRepository", usar PrismaUserRepository
+      provide: 'UserRepository',   
       useClass: PrismaUserRepository,
     },
   ],
