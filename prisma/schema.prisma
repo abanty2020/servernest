@@ -1,0 +1,169 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Appointments {
+  id               Int                @id @default(autoincrement())
+  date             DateTime           @db.Date
+  time             DateTime           @db.Time(6)
+  hour_service_id  Int
+  created_at       DateTime           @default(dbgenerated("'2024-09-15 04:08:59.559748+00'::timestamp with time zone")) @db.Timestamptz(6)
+  updated_at       DateTime           @db.Timestamptz(6)
+  Hour_service     Hour_service       @relation(fields: [hour_service_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "appointments_hour_service_fk")
+  User_appointment User_appointment[]
+}
+
+model Branch_type_service {
+  branch_id       Int
+  created_at      DateTime      @db.Timestamptz(6)
+  updated_at      DateTime      @db.Timestamptz(6)
+  type_service_id Int
+  id              String?       @db.VarChar
+  Type_services   Type_services @relation(fields: [type_service_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "branch_type_service_type_services_fk")
+  Branches        Branches      @relation(fields: [branch_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "service_branch_fk0")
+
+  @@id([type_service_id, branch_id], map: "branch_type_service_pk")
+}
+
+model Branches {
+  id                  Int                   @id @default(autoincrement())
+  is_headquarters     Boolean
+  address             String                @db.VarChar(255)
+  city                String                @db.VarChar(255)
+  postal_code         String                @db.VarChar(20)
+  country             String                @db.VarChar(100)
+  phone_number        String                @db.VarChar(20)
+  email               String                @db.VarChar(100)
+  created_at          DateTime              @default(dbgenerated("'2024-09-15 04:08:52.141249+00'::timestamp with time zone")) @db.Timestamptz(6)
+  updated_at          DateTime              @db.Timestamptz(6)
+  name                String?               @db.VarChar(150)
+  parent_branch_id    Int?
+  domain              String?               @db.VarChar(255)
+  Branch_type_service Branch_type_service[]
+  Branches            Branches?             @relation("BranchesToBranches", fields: [parent_branch_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "branches_branches_fk")
+  other_Branches      Branches[]            @relation("BranchesToBranches")
+  Branches_users      Branches_users[]
+}
+
+model Branches_users {
+  id         Int        @id @default(autoincrement())
+  branch_id  Int        @default(autoincrement())
+  user_id    Int        @default(autoincrement())
+  created_at DateTime   @default(dbgenerated("'2024-09-16 18:51:30.410141+00'::timestamp with time zone")) @db.Timestamptz(6)
+  update_at  DateTime   @db.Timestamptz(6)
+  Branches   Branches   @relation(fields: [branch_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "branches_users_branches_fk")
+  Users      Users      @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "branches_users_users_fk")
+  Services   Services[]
+}
+
+model Days_service {
+  id           Int            @id @default(autoincrement())
+  date         DateTime       @db.Date
+  service_id   Int
+  created_at   DateTime       @default(dbgenerated("'2024-09-15 04:08:59.559748+00'::timestamp with time zone")) @db.Timestamptz(6)
+  updated_at   DateTime?      @db.Timestamptz(6)
+  Services     Services       @relation(fields: [service_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "Days_service_fk3")
+  Hour_service Hour_service[]
+}
+
+model Hour_service {
+  id               Int            @id @default(autoincrement())
+  time             DateTime       @db.Time(6)
+  interval_time    DateTime       @db.Time(6)
+  places_available Int
+  day_service_id   Int
+  created_at       DateTime       @default(dbgenerated("'2024-09-15 04:08:59.559748+00'::timestamp with time zone")) @db.Timestamptz(6)
+  updated_at       DateTime?      @db.Timestamptz(6)
+  Appointments     Appointments[]
+  Days_service     Days_service   @relation(fields: [day_service_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "Hour_service_fk3")
+}
+
+model Permissions {
+  id          Int      @id @default(autoincrement())
+  name        String   @db.VarChar(100)
+  description Int
+  status      Boolean
+  role_id     Int
+  created_at  DateTime @default(dbgenerated("'2024-09-15 04:09:03.722206+00'::timestamp with time zone")) @db.Timestamptz(6)
+  updated_at  DateTime @db.Timestamptz(6)
+  Roles       Roles    @relation(fields: [role_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "Permissions_fk4")
+}
+
+model Roles {
+  id          Int           @id @default(autoincrement())
+  name        String        @db.VarChar(100)
+  description String        @db.VarChar(255)
+  created_at  DateTime      @default(dbgenerated("'2024-09-15 04:08:57.267805+00'::timestamp with time zone")) @db.Timestamptz(6)
+  updated_at  DateTime      @db.Timestamptz(6)
+  Permissions Permissions[]
+}
+
+model Services {
+  id              Int            @id @default(autoincrement())
+  name            String         @db.VarChar(100)
+  description     String         @db.VarChar(255)
+  duration        String         @db.VarChar(50)
+  status          Boolean
+  created_at      DateTime       @default(dbgenerated("'2024-09-15 04:09:07.2659+00'::timestamp with time zone")) @db.Timestamptz(6)
+  updated_at      DateTime       @db.Timestamptz(6)
+  branch_user_id  Int
+  type_service_id Int
+  Days_service    Days_service[]
+  Branches_users  Branches_users @relation(fields: [branch_user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "services_branches_users_fk")
+  Type_services   Type_services  @relation(fields: [id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "services_type_services_fk")
+  Settings        Settings[]
+}
+
+model Settings {
+  id          Int      @id @default(autoincrement())
+  name        String   @db.VarChar(150)
+  description String   @db.VarChar(255)
+  status      Boolean  @default(false)
+  service_id  Int
+  created_at  DateTime @default(dbgenerated("'2024-09-15 04:09:09.613755+00'::timestamp with time zone")) @db.Timestamptz(6)
+  updated_at  DateTime @db.Timestamptz(6)
+  Services    Services @relation(fields: [service_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "Settings_fk4")
+}
+
+model Type_services {
+  id                  Int                   @id @default(autoincrement())
+  name                String                @db.VarChar(100)
+  description         String                @db.VarChar(255)
+  status              Boolean               @default(true)
+  created_at          DateTime              @default(dbgenerated("'2024-09-15 19:24:02.696235+00'::timestamp with time zone")) @db.Timestamptz(6)
+  update_at           DateTime              @db.Timestamptz(6)
+  Branch_type_service Branch_type_service[]
+  Services            Services?
+}
+
+model User_appointment {
+  user_id        Int          @unique(map: "user_appointment_user_id_key") @default(autoincrement())
+  appointment_id Int
+  status         String       @db.VarChar(100)
+  confirmed_at   DateTime     @db.Timestamptz(6)
+  created_at     DateTime     @default(dbgenerated("'2024-09-15 04:09:15.880727+00'::timestamp with time zone")) @db.Timestamptz(6)
+  updated_at     DateTime     @db.Timestamptz(6)
+  Users          Users        @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "user_appointment_fk0")
+  Appointments   Appointments @relation(fields: [appointment_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "user_appointment_fk1")
+
+  @@id([user_id, appointment_id], map: "user_appointment_pkey")
+}
+
+model Users {
+  id               Int               @id @default(autoincrement())
+  full_name        String?           @db.VarChar(150)
+  age              Int?
+  email            String?           @unique @db.VarChar(100)
+  password         String            @db.VarChar(255)
+  avatar           String?           @db.VarChar(255)
+  created_at       DateTime?         @db.Timestamptz(6)
+  updated_at       DateTime?         @db.Timestamptz(6)
+  state            Boolean?          @default(true)
+  Branches_users   Branches_users[]
+  User_appointment User_appointment?
+}
